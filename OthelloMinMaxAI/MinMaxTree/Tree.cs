@@ -13,5 +13,10 @@ namespace OthelloMinMaxAI.Tree
         {
             this.gameState = gameState;
         }
+
+        public Move GetMove()
+        {
+
+        }
     }
 }
