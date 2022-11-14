@@ -1,4 +1,5 @@
 ﻿using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -22,6 +23,25 @@ namespace OthelloMinMaxAI
         public GameBoard(int width, int height)
         {
             tiles = new TileState[width, height];
+            for (int x = 0; x < tiles.GetLength(0); x++)
+            {
+                for (int y = 0; y < tiles.GetLength(1); y++)
+                {
+                    int random = Game1.random.Next(30);
+                    if (random > 25)
+                    {
+                        tiles[x, y] = TileState.White;
+                    }
+                    else if (random > 20 && random <= 25)
+                    {
+                        tiles[x, y] = TileState.Black;
+                    }
+                    else
+                    {
+                        tiles[x, y] = TileState.Empty;
+                    }
+                }
+            }
         }
 
         public bool IsWithinBounds(Point point) => point.X >= 0 && point.X < Width && point.Y >= 0 && point.Y < Height;
@@ -111,6 +131,41 @@ namespace OthelloMinMaxAI
 
             }
             return true;
+        }
+
+        public void Draw(SpriteBatch spriteBatch)
+        {
+            if (spriteBatch == null) return;
+
+
+
+            for (int x = 0; x < tiles.GetLength(0); x++)
+            {
+                for (int y = 0; y < tiles.GetLength(1); y++)
+                {
+                    Rectangle pos = new Rectangle(x * Game1.TILE_SIZE + Game1.TILE_SIZE /6, y * Game1.TILE_SIZE + 256 + Game1.TILE_SIZE / 6, (int)(Game1.TILE_SIZE / 1.5), (int)(Game1.TILE_SIZE / 1.5));
+                    Vector2 recPos = new Vector2 (x * Game1.TILE_SIZE, y * Game1.TILE_SIZE + 256);
+                    switch (tiles[x,y])
+                    {
+                        case TileState.Empty:
+                            spriteBatch.Draw(Game1.rectangleTexture, recPos, Color.White);
+                            break;
+                        case TileState.Black:
+                            spriteBatch.Draw(Game1.rectangleTexture, recPos, Color.White);
+                            spriteBatch.Draw(Game1.circleTexture, pos, Color.Black);
+                            break;
+                        case TileState.White:
+                            spriteBatch.Draw(Game1.rectangleTexture, recPos, Color.White);
+                            spriteBatch.Draw(Game1.circleTexture, pos, Color.White);
+                            break;
+                        default:
+                            spriteBatch.Draw(Game1.rectangleTexture, recPos, Color.White);
+                            break;
+                    }
+                }
+            }
+            
+
         }
     }
 

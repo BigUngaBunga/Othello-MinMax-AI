@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace OthelloMinMaxAI.Tree
+namespace OthelloMinMaxAI
 {
     class Tree
     {
@@ -16,7 +16,7 @@ namespace OthelloMinMaxAI.Tree
 
         public Move GetMove()
         {
-
+            return new Move();
         }
     }
 }
