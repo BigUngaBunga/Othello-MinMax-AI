@@ -85,17 +85,16 @@ namespace OthelloMinMaxAI
 
         private bool MoveIsValidHorizontal(Move move)
         {
-            bool validChain = true;
             for (int i = move.X; i < Width; i++)
             {
-                if (validChain && IsOwn(i, move.Y, move.player))
+                if (IsOwn(i, move.Y, move.player))
                     return true;
                 else if (!IsOpponent(i, move.Y, move.player))
                     break;
             }
-            for (int i = Width - 1; i >= move.X; i--)
+            for (int i = move.X; i >= move.X; i--)
             {
-                if (validChain && IsOwn(i, move.Y, move.player))
+                if (IsOwn(i, move.Y, move.player))
                     return true;
                 else if (!IsOpponent(i, move.Y, move.player))
                     break;
@@ -105,19 +104,18 @@ namespace OthelloMinMaxAI
 
         private bool MoveIsValidVertical(Move move)
         {
-            bool validChain = true;
             for (int i = move.Y; i < Height; i++)
             {
-                if (validChain && IsOwn(i, move.X, move.player))
+                if (IsOwn(move.X, i, move.player))
                     return true;
-                else if (!IsOpponent(i, move.X, move.player))
+                else if (!IsOpponent(move.X, i, move.player))
                     break;
             }
-            for (int i = Height - 1; i >= move.Y; i--)
+            for (int i = move.Y; i >= move.Y; i--)
             {
-                if (validChain && IsOwn(i, move.X, move.player))
+                if (IsOwn(move.X, i, move.player))
                     return true;
-                else if (!IsOpponent(i, move.X, move.player))
+                else if (!IsOpponent(move.X, i, move.player))
                     break;
             }
             return false;
@@ -125,12 +123,25 @@ namespace OthelloMinMaxAI
 
         private bool MoveIsValidDiagonal(Move move)
         {
-            int closestBorder = 0;
-            for (int i = 0; i < Width; i++)
-            {
+            int x, y;
+            return SearchDiagonal(false, false) || SearchDiagonal(true, false) || SearchDiagonal(false, true) || SearchDiagonal(true, true);
 
+            bool SearchDiagonal(bool positiveX, bool positiveY)
+            {
+                int i = 0;
+                while (true)
+                {
+                    ++i;
+                    x = positiveX ? move.X + i : move.X - i;
+                    y = positiveY ? move.Y + i : move.Y - i;
+                    if (!IsWithinBounds(x, y))
+                        return false;
+                    if (IsOwn(x, y, move.player))
+                        return true;
+                    if (!IsOpponent(x, y, move.player))
+                        return false;
+                }
             }
-            return true;
         }
 
         public void Draw(SpriteBatch spriteBatch)
