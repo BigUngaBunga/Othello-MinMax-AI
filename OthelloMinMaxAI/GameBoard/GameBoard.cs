@@ -14,6 +14,7 @@ namespace OthelloMinMaxAI
         private int Width => tiles.GetLength(0);
         private int Height => tiles.GetLength(1);
 
+        
 
         public GameBoard(TileState[,] tiles)
         {
@@ -66,7 +67,41 @@ namespace OthelloMinMaxAI
                 _ => false,
             };
         }
+        private List<Point> GetEmptyAdjacent(int x, int y)
+        {
+            List<Point> result = new List<Point>();
+            for (int i = -1; i < 2; i++)
+            {
+                for (int j = -1; j < 2; j++)
+                {
+                    Point point = new Point(x + i, y + j);
+                    if (IsWithinBounds(point) && tiles[point.X, point.Y] == TileState.Empty)
+                        result.Add(point);
+                }
+            }
+            return result;
+        }
 
+        public List<Move> GetPossibleMoves(Player player) 
+        { 
+            List<Move> possibleMoves = new List<Move>();
+            HashSet<Point> evaluationPoints = new HashSet<Point>();
+
+            TileState opposingTile = player == Player.Black ? TileState.White: TileState.Black;
+            for (int x = 0; x < Width; x++)
+                for (int y = 0; y < Height; y++)
+                    if (tiles[x, y] == opposingTile)
+                        evaluationPoints.UnionWith(GetEmptyAdjacent(x, y));
+
+            foreach (var point in evaluationPoints)
+            {
+                Move move = new Move(point, player);
+                if (MoveIsValid(move))
+                    possibleMoves.Add(move);
+            }
+
+            return possibleMoves;
+        }
 
         public bool AttemptMove(Move move)
         {
@@ -76,6 +111,7 @@ namespace OthelloMinMaxAI
             return isMoveValid;
         }
 
+        //TODO flip relevant tokens to the right colour
         private void PlaceToken(Move move)
         {
 
