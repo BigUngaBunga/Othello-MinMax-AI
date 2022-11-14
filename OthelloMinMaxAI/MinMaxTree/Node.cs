@@ -13,19 +13,28 @@ namespace OthelloMinMaxAI
         private bool isMax;
         private int value;
         private int depth;
+        Player player;
 
         private List<Move> viableMoves;
         private List<Node> children;
 
-        public Node(GameBoard gameState, Move move, bool isLeaf, bool isMax, int depth)
+        public Node(GameBoard gameState, Move move, bool isLeaf, bool isMax, int depth, Player player)
         {
             this.gameState = gameState;
             this.move = move;
             this.isLeaf = isLeaf;
             this.isMax = isMax;
             this.depth = depth;
-            CalculateValue();
-            
+            this.player = player;
+            if (IsLeaf)
+            {
+                CalculateValue();
+            }
+            else
+            {
+                TraverseTree();
+            }
+            CreateChildren();
         }
 
         //Getters & Setters
@@ -35,14 +44,19 @@ namespace OthelloMinMaxAI
 
         private void CalculateValue()
         {
-            //value = gameState.ValueForBlack;
+            value = player == Player.Black ? gameState.BlackScore : gameState.WhiteScore;
         }
 
         public void CreateChildren()
         {
+            if (IsLeaf)
+            {
+
+                return;
+            }
             foreach (Move move in viableMoves)
             {
-                children.Add(new Node(gameState, move, (depth == 5), !IsMax, depth));
+                children.Add(new Node(gameState, move, (depth == Game1.MAX_TREE_DEPTH-1), !IsMax, depth, player == Player.Black ? Player.White : Player.Black));
             }
             
         }

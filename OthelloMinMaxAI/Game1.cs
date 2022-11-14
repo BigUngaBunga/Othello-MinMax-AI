@@ -8,6 +8,7 @@ namespace OthelloMinMaxAI
 {
     public class Game1 : Game
     {
+        public const int MAX_TREE_DEPTH = 5;
         public const int GAMEBOARD_SIZE = 8;
         public const int TILE_SIZE = 64;
         public const int LINE_WIDTH = 4;

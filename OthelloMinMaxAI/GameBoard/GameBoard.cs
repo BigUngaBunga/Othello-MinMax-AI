@@ -14,7 +14,12 @@ namespace OthelloMinMaxAI
         private int Width => tiles.GetLength(0);
         private int Height => tiles.GetLength(1);
 
-        
+        public int whitePieces;
+        public int blackPieces;
+
+        public int BlackScore => blackPieces - whitePieces;
+        public int WhiteScore => whitePieces - blackPieces;
+
 
         public GameBoard(TileState[,] tiles)
         {
@@ -24,25 +29,6 @@ namespace OthelloMinMaxAI
         public GameBoard(int width, int height)
         {
             tiles = new TileState[width, height];
-            for (int x = 0; x < tiles.GetLength(0); x++)
-            {
-                for (int y = 0; y < tiles.GetLength(1); y++)
-                {
-                    int random = Game1.random.Next(30);
-                    if (random > 25)
-                    {
-                        tiles[x, y] = TileState.White;
-                    }
-                    else if (random > 20 && random <= 25)
-                    {
-                        tiles[x, y] = TileState.Black;
-                    }
-                    else
-                    {
-                        tiles[x, y] = TileState.Empty;
-                    }
-                }
-            }
         }
 
         public bool IsWithinBounds(Point point) => point.X >= 0 && point.X < Width && point.Y >= 0 && point.Y < Height;
