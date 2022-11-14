@@ -2,15 +2,17 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace OthelloMinMaxAI.GameBoard
+namespace OthelloMinMaxAI
 {
+    public enum Player { Black, White };
+
     class Move
     {
-        int row, column;
+        private int x, y;
 
 
-        public string Player { get; set; }
-        public int Row => row;
-        public int Column => column;
+        public Player player { get; set; }
+        public int X => x;
+        public int Y => y;
     }
 }
