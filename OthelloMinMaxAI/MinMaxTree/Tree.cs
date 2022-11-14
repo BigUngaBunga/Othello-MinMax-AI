@@ -13,12 +13,12 @@ namespace OthelloMinMaxAI
         public Tree(GameBoard gameState, Player player)
         {
             this.gameState = gameState;
-            root = new Node(gameState, new Move(), false, true, 0);
+            //root = new Node(gameState, new Move(), false, true, 0);
         }
 
-        public Move GetMove()
-        {
-            return new Move();
-        }
+        //public Move GetMove()
+        //{
+        //    return new Move();
+        //}
     }
 }

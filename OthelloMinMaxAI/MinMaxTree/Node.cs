@@ -32,7 +32,7 @@ namespace OthelloMinMaxAI
             }
             else
             {
-                TraverseTree();
+                //TraverseTree();
             }
             CreateChildren();
         }
