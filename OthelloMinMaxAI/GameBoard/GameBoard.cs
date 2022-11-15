@@ -33,26 +33,26 @@ namespace OthelloMinMaxAI
 
         public bool IsWithinBounds(Point point) => point.X >= 0 && point.X < Width && point.Y >= 0 && point.Y < Height;
         public bool IsWithinBounds(int x, int y) => x >= 0 && x < Width && y >= 0 && y < Height;
-        private bool IsOwn(int x, int y, Player currentPlayer)
+        private TileState GetOwn(Player currentPlayer)
         {
-            TileState tile = tiles[x, y];
-            return tile switch
+            return currentPlayer switch
             {
-                TileState.Black => currentPlayer == Player.Black,
-                TileState.White => currentPlayer == Player.White,
-                _ => false,
+                Player.Black => TileState.Black,
+                Player.White => TileState.White,
+                _ => TileState.Black,
             };
         }
-        private bool IsOpponent(int x, int y, Player currentPlayer)
+        private TileState GetOpponent(Player currentPlayer)
         {
-            TileState tile = tiles[x, y];
-            return tile switch
+            return currentPlayer switch
             {
-                TileState.Black => currentPlayer == Player.White,
-                TileState.White => currentPlayer == Player.Black,
-                _ => false,
+                Player.Black => TileState.White,
+                Player.White => TileState.Black,
+                _ => TileState.White,
             };
         }
+        private bool IsOwn(int x, int y, Player currentPlayer) => tiles[x, y] == GetOwn(currentPlayer);
+        private bool IsOpponent(int x, int y, Player currentPlayer) => tiles[x, y] == GetOpponent(currentPlayer);
         private List<Point> GetEmptyAdjacent(int x, int y)
         {
             List<Point> result = new List<Point>();
@@ -67,7 +67,6 @@ namespace OthelloMinMaxAI
             }
             return result;
         }
-
         public List<Move> GetPossibleMoves(Player player) 
         { 
             List<Move> possibleMoves = new List<Move>();
@@ -82,7 +81,7 @@ namespace OthelloMinMaxAI
             foreach (var point in evaluationPoints)
             {
                 Move move = new Move(point, player);
-                if (MoveIsValid(move))
+                if (MoveIsValid(move, out _))
                     possibleMoves.Add(move);
             }
 
@@ -91,34 +90,49 @@ namespace OthelloMinMaxAI
 
         public bool AttemptMove(Move move)
         {
-            bool isMoveValid = IsWithinBounds(move.X, move.Y) && MoveIsValid(move);
-            if(isMoveValid)
-                PlaceToken(move);
-            return isMoveValid;
-        }
-
-        //TODO flip relevant tokens to the right colour
-        private void PlaceToken(Move move)
-        {
+            if (!IsWithinBounds(move.X, move.Y))
+                return false;
             
+            if(MoveIsValid(move, out HashSet<Point> tilesToFlip))
+                MakeMove(move, tilesToFlip);
+            return true;
         }
 
-        private bool MoveIsValid(Move move)
+        private void MakeMove(Move move, HashSet<Point> tilesToFlip)
         {
-            bool isValid = MoveIsValidDiagonal(move) || MoveIsValidHorizontal(move) || MoveIsValidVertical(move);
+            TileState playerToken = GetOwn(move.player);
+            tiles[move.X, move.Y] = playerToken;
+            foreach (var point in tilesToFlip)
+                tiles[point.X, point.Y] = playerToken;
+        }
+
+
+        private bool MoveIsValid(Move move, out HashSet<Point> flipedTiles)
+        {
+            flipedTiles = new HashSet<Point>();
+
+            bool isValid = MoveIsValidDiagonal(move, out List<Point> diagonalTiles);
+            isValid = MoveIsValidHorizontal(move, out List<Point> horizontalTiles) || isValid;
+            isValid = MoveIsValidVertical(move, out List<Point> verticalTiles) || isValid;
+            flipedTiles.UnionWith(diagonalTiles);
+            flipedTiles.UnionWith(horizontalTiles);
+            flipedTiles.UnionWith(verticalTiles);
+
             return isValid;
         }
 
-        private bool MoveIsValidHorizontal(Move move)
+        private bool MoveIsValidHorizontal(Move move, out List<Point> tilesInChain)
         {
-            for (int i = move.X; i < Width; i++)
+            tilesInChain = new List<Point>();
+
+            for (int i = move.X +1; i < Width; i++)
             {
                 if (IsOwn(i, move.Y, move.player))
                     return true;
                 else if (!IsOpponent(i, move.Y, move.player))
                     break;
             }
-            for (int i = move.X; i >= move.X; i--)
+            for (int i = move.X + 1; i >= move.X; i--)
             {
                 if (IsOwn(i, move.Y, move.player))
                     return true;
@@ -128,8 +142,10 @@ namespace OthelloMinMaxAI
             return false;
         }
 
-        private bool MoveIsValidVertical(Move move)
+        private bool MoveIsValidVertical(Move move, out List<Point> tilesInChain)
         {
+            tilesInChain = new List<Point>();
+
             for (int i = move.Y; i < Height; i++)
             {
                 if (IsOwn(move.X, i, move.player))
@@ -144,11 +160,23 @@ namespace OthelloMinMaxAI
                 else if (!IsOpponent(move.X, i, move.player))
                     break;
             }
-            return false;
+            return GitGud();
+
+            bool GitGud()
+            {
+                bool value = Scrub();
+                return value;
+
+                bool Scrub()
+                {
+                    return false;
+                }
+            }
         }
 
-        private bool MoveIsValidDiagonal(Move move)
+        private bool MoveIsValidDiagonal(Move move, out List<Point> tilesInChain)
         {
+            tilesInChain = new List<Point>();
             int x, y;
             return SearchDiagonal(false, false) || SearchDiagonal(true, false) || SearchDiagonal(false, true) || SearchDiagonal(true, true);
 

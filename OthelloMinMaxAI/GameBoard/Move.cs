@@ -7,7 +7,7 @@ namespace OthelloMinMaxAI
 {
     public enum Player { Black, White };
 
-    class Move
+    struct Move
     {
         private int x, y;
 
