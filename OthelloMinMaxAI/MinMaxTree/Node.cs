@@ -26,6 +26,7 @@ namespace OthelloMinMaxAI
             this.isLeaf = isLeaf;
             this.depth = depth;
             this.Player = player;
+            viableMoves = gameState.GetPossibleMoves(player);
         }
 
         //Getters & Setters
