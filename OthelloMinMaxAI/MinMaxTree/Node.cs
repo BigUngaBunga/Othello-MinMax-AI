@@ -7,25 +7,26 @@ namespace OthelloMinMaxAI
     class Node
     {
 
+
         private GameBoard gameState;
         private Move move;
-        private bool isLeaf;
-        private bool isMax;
-        private int value;
         private int depth;
-        Player player;
+        private bool isLeaf;
+        private bool isPruned = false;
+        private int value;
+        public Player Player { get; private set; }
+        public Player OppositePlayer => Player == Player.Black ? Player.White : Player.Black;
 
         private List<Move> viableMoves;
         private List<Node> children;
 
-        public Node(GameBoard gameState, Move move, bool isLeaf, bool isMax, int depth, Player player)
+        public Node(GameBoard gameState, Move move, bool isLeaf, int depth, Player player)
         {
             this.gameState = gameState;
             this.move = move;
             this.isLeaf = isLeaf;
-            this.isMax = isMax;
             this.depth = depth;
-            this.player = player;
+            this.Player = player;
             if (IsLeaf)
             {
                 CalculateValue();
@@ -40,11 +41,10 @@ namespace OthelloMinMaxAI
         //Getters & Setters
         public int Value => value;
         public bool IsLeaf => isLeaf;
-        public bool IsMax => isMax;
 
         private void CalculateValue()
         {
-            value = player == Player.Black ? gameState.BlackScore : gameState.WhiteScore;
+            value = Player == Player.Black ? gameState.BlackScore : gameState.WhiteScore;
         }
 
         public void CreateChildren()
@@ -56,11 +56,9 @@ namespace OthelloMinMaxAI
             }
             foreach (Move move in viableMoves)
             {
-                children.Add(new Node(gameState, move, (depth == Game1.MAX_TREE_DEPTH-1), !IsMax, depth, player == Player.Black ? Player.White : Player.Black));
+                children.Add(new Node(gameState, move, (depth == Game1.MAX_TREE_DEPTH-1), depth, OppositePlayer));
             }
             
         }
-
-
     }
 }

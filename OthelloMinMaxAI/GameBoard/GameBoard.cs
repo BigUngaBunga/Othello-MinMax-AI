@@ -100,10 +100,14 @@ namespace OthelloMinMaxAI
         //TODO flip relevant tokens to the right colour
         private void PlaceToken(Move move)
         {
-
+            
         }
 
-        private bool MoveIsValid(Move move) => MoveIsValidDiagonal(move) || MoveIsValidHorizontal(move) || MoveIsValidVertical(move);
+        private bool MoveIsValid(Move move)
+        {
+            bool isValid = MoveIsValidDiagonal(move) || MoveIsValidHorizontal(move) || MoveIsValidVertical(move);
+            return isValid;
+        }
 
         private bool MoveIsValidHorizontal(Move move)
         {
@@ -178,7 +182,7 @@ namespace OthelloMinMaxAI
                 {
                     Rectangle pos = new Rectangle(x * Game1.TILE_SIZE + Game1.TILE_SIZE /6, y * Game1.TILE_SIZE + 256 + Game1.TILE_SIZE / 6, (int)(Game1.TILE_SIZE / 1.5), (int)(Game1.TILE_SIZE / 1.5));
                     Vector2 recPos = new Vector2 (x * Game1.TILE_SIZE, y * Game1.TILE_SIZE + 256);
-                    switch (tiles[x,y])
+                    switch (tiles[x, y])
                     {
                         case TileState.Empty:
                             spriteBatch.Draw(Game1.rectangleTexture, recPos, Color.White);
@@ -201,6 +205,4 @@ namespace OthelloMinMaxAI
 
         }
     }
-
-
 }
