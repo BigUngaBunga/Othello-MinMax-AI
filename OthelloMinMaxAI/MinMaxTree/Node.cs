@@ -4,21 +4,20 @@ using System.Text;
 
 namespace OthelloMinMaxAI
 {
-    class Node
+    abstract class Node
     {
 
-
-        private GameBoard gameState;
-        private Move move;
-        private int depth;
-        private bool isLeaf;
-        private bool isPruned = false;
-        private int value;
+        protected GameBoard gameState;
+        protected Move move;
+        protected int depth;
+        protected bool isLeaf;
+        public bool isPruned = false;
+        protected int value;
         public Player Player { get; private set; }
         public Player OppositePlayer => Player == Player.Black ? Player.White : Player.Black;
 
-        private List<Move> viableMoves;
-        private List<Node> children;
+        protected List<Move> viableMoves;
+        protected List<Node> children;
 
         public Node(GameBoard gameState, Move move, bool isLeaf, int depth, Player player)
         {
@@ -27,38 +26,16 @@ namespace OthelloMinMaxAI
             this.isLeaf = isLeaf;
             this.depth = depth;
             this.Player = player;
-            if (IsLeaf)
-            {
-                CalculateValue();
-            }
-            else
-            {
-                //TraverseTree();
-            }
-            CreateChildren();
         }
 
         //Getters & Setters
         public int Value => value;
         public bool IsLeaf => isLeaf;
 
-        private void CalculateValue()
-        {
-            value = Player == Player.Black ? gameState.BlackScore : gameState.WhiteScore;
-        }
+        public abstract void CalculateValue();
 
-        public void CreateChildren()
-        {
-            if (IsLeaf)
-            {
+        public abstract void TraverseTree(ref int alpha, ref int beta);
 
-                return;
-            }
-            foreach (Move move in viableMoves)
-            {
-                children.Add(new Node(gameState, move, (depth == Game1.MAX_TREE_DEPTH-1), depth, OppositePlayer));
-            }
-            
-        }
+        protected abstract void CreateChildren();
     }
 }
