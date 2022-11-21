@@ -13,7 +13,7 @@ namespace OthelloMinMaxAI
     class Tile
     {
         public Point Location { get; }
-
+        public Point Index { get; private set; }
         Color color;
 
         public Color tileColor;
@@ -35,6 +35,7 @@ namespace OthelloMinMaxAI
 
         public Tile(int X, int Y)
         {
+            Index = new Point(X, Y);
             Location = new Point(X * Constants.TileWidth, Y * Constants.TileWidth);
             color = Color.Transparent;
             tileColor = Color.Gray;

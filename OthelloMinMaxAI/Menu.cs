@@ -13,6 +13,7 @@ namespace OthelloMinMaxAI
     {
         public Rectangle hitbox;
         public Color color;
+        
 
         public ColorOption(Vector2 location, Color color)
         {
@@ -97,9 +98,11 @@ namespace OthelloMinMaxAI
         public static SelectedOption playerOne, playerTwo;
 
         static Tile showcase;
+        private static bool useAi;
 
         static ButtonManager buttonManager;
         static Button startButton;
+        static Button aiButton;
 
 
 
@@ -112,7 +115,9 @@ namespace OthelloMinMaxAI
 
             buttonManager = new ButtonManager();
             startButton = new Button(SpriteClass.StartButton, new Point(Constants.MenuSize.X / 2 - 64, Constants.MenuSize.Y * 3 / 4), new Point(128, 64), 0.5f);
+            aiButton = new Button(SpriteClass.StartButton, new Point(Constants.MenuSize.X / 2 - 64, Constants.MenuSize.Y * 2 / 4), new Point(128, 64), 0.5f);
             buttonManager.Add(startButton);
+            buttonManager.Add(aiButton);
 
             LoadColors(colorOptionsOne, new Vector2(Constants.ColorWidth));
             LoadColors(colorOptionsTwo, new Vector2(Constants.MenuSize.X - Constants.ColorWidth * 2, Constants.ColorWidth));
@@ -148,9 +153,16 @@ namespace OthelloMinMaxAI
         {
             buttonManager.Update(gameTime);
 
+            if (aiButton.buttonPressed)
+            {
+                useAi = !useAi;
+                aiButton.ChangeColour(Color.Blue, useAi);
+                aiButton.buttonPressed = false;
+            }
+
             if (startButton.buttonPressed)
             {
-                GameManager.NewGame();
+                GameManager.NewGame(useAi);
                 startButton.buttonPressed = false;
             }
 

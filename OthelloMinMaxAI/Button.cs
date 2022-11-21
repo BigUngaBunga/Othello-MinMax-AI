@@ -14,6 +14,7 @@ namespace OthelloMinMaxAI
         Texture2D tex;
         public bool pressable;
         public bool buttonPressed;
+        public Color color;
         int currentFrame;
         float timer;
         float timeTillUnpress;
@@ -23,6 +24,7 @@ namespace OthelloMinMaxAI
             this.tex = tex;
             this.timeTillUnpress = timeTillUnpress;
             hitbox = new Rectangle(location, dimensions);
+            color = Color.White;
         }
 
         public void Update(GameTime gameTime)
@@ -55,7 +57,12 @@ namespace OthelloMinMaxAI
         public void Draw(SpriteBatch sb)
         {
             Rectangle source = new Rectangle(tex.Width * currentFrame / 2, 0, tex.Width / 2, tex.Height);
-            sb.Draw(tex, hitbox, source, Color.White);
+            sb.Draw(tex, hitbox, source, color);
+        }
+
+        public void ChangeColour(Color newColour, bool useColour)
+        {
+            color = useColour ? newColour : Color.White;
         }
     }
 }

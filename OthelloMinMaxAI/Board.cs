@@ -11,14 +11,15 @@ namespace OthelloMinMaxAI
 {
     class Board
     {
-        float timer, timeToHelp, flashTimer, timeToFlash;
+        public List<Tile> Placeables { get; private set; }
 
+        private bool useAi;
+        float timer, timeToHelp, flashTimer, timeToFlash;
         int currentPlayer, currentOpponent, lockDetection, onePoints, twoPoints;
 
         Tile[,] tiles;
         int[,] tileValues;
 
-        List<Tile>  placeables;
 
         List<Point> turnPotentials, pointsToTurn;
 
@@ -28,24 +29,28 @@ namespace OthelloMinMaxAI
 
         int /*mostDisksAI,*/ countDisksAI;
         Point turnDiskAI;
-        float timeAI;
+        float timeAI = 5;
 
 
-        public Board()
+        public Board(bool useAi)
         {
+            this.useAi = useAi;
+
             tiles = new Tile[Constants.BoardSize, Constants.BoardSize];
             tileValues = new int[Constants.BoardSize, Constants.BoardSize];
 
-            placeables = new List<Tile>();
+            Placeables = new List<Tile>();
             turnPotentials = new List<Point>();
             pointsToTurn = new List<Point>();
 
             timerDirection = 1;
             diskAnimationInterval = 0.05f;
 
-            timeToHelp = 5;
-            timeToFlash = 1;
+            timeToHelp = 1;
+            timeToFlash = 0.25f;
         }
+
+        public int[,] TileValues => tileValues;
 
         /// <summary>
         /// Reset the board to the start.
@@ -108,17 +113,17 @@ namespace OthelloMinMaxAI
         //}
 
 
+        
+
+
         /// <summary>
         /// Finds placeables that the player can press. May be replaced!
         /// </summary>
         public void FindPlaceables()
         {
-            foreach (Tile t in placeables)
-            {
-                t.showPlace = false;
-            }
+            ShowValidMoves(false);
 
-            placeables.Clear();
+            Placeables.Clear();
 
             timer = 0;
             flashTimer = 0;
@@ -146,18 +151,14 @@ namespace OthelloMinMaxAI
                 }
             }
 
-            timeAI = 0;
-            foreach (Tile t in placeables)
-            {
-                timeAI += 0.125f;
-            }
+            ShowValidMoves(true);
 
             if (lockDetection >= 2)
             {
                 //EndGame();
                 enterEndGame = true;
             }
-            else if (placeables.Count == 0)
+            else if (Placeables.Count == 0)
             {
                 lockDetection++;
                 SwitchSides();
@@ -166,6 +167,12 @@ namespace OthelloMinMaxAI
             {
                 lockDetection = 0;
             }
+        }
+
+        private void ShowValidMoves(bool showMove)
+        {
+            foreach (Tile t in Placeables)
+                t.showPlace = showMove;
         }
 
         /// <summary>
@@ -188,9 +195,9 @@ namespace OthelloMinMaxAI
             }
             else if (tileValues[x + a, y + b] == 0)
             {
-                if (!placeables.Contains(tiles[x + a, y + b]))
+                if (!Placeables.Contains(tiles[x + a, y + b]))
                 {
-                    placeables.Add(tiles[x + a, y + b]);
+                    Placeables.Add(tiles[x + a, y + b]);
 
                     //if (activeAI && currentPlayer == 2)
                     //{
@@ -210,6 +217,7 @@ namespace OthelloMinMaxAI
                 countDisksAI = 0;
             }
         }
+
 
         /// <summary>
         /// Iterates in a direction and add opposing tiles in a list. If 
@@ -245,12 +253,12 @@ namespace OthelloMinMaxAI
         /// </summary>
         public void EndGame()
         {
-            foreach (Tile tile in placeables)
+            foreach (Tile tile in Placeables)
             {
                 tile.showPlace = false;
             }
 
-            placeables.Clear();
+            Placeables.Clear();
 
             GameManager.GameOver(onePoints, twoPoints, tiles);
         }
@@ -292,95 +300,26 @@ namespace OthelloMinMaxAI
             if (!transition)
             {
                 timer += (float)gameTime.ElapsedGameTime.TotalSeconds;
-                if (timer >= timeToHelp)
+                if (useAi && currentPlayer == 1) //ska vara 2
                 {
-                    flashTimer -= (float)gameTime.ElapsedGameTime.TotalSeconds;
-                    if (flashTimer <= 0)
-                    {
-                        flashTimer = timeToFlash;
-                        foreach (Tile t in placeables)
-                        {
-                            t.showPlace = !t.showPlace;
-                        }
-                    }
+                    Point move = Tree.GetMove(TileValues);
+                    MakeMove(move);
+                    transition = true;
+                    timer = 0;
+                    //if (timer >= timeAI)
+                    //{
+                    //}
                 }
-
-                if (currentPlayer == 3) //ska vara 2
+                else if (PressedATile(out Tile tile))
                 {
-                    if (timer >= timeAI)
+                    if (Placeables.Contains(tile))
                     {
-                        //lägg in logik
-
-                        //siffrorna som är viktiga, vad minimax kollar efter, är antalet brickor man vänder!
-
-
-
-                        //tiles[turnDiskAI.X, turnDiskAI.Y].TurnDisc(currentPlayer, 0);
-
-                        //for (int a = -1; a < 2; a++)
-                        //{
-                        //    for (int b = -1; b < 2; b++)
-                        //    {
-                        //        if (a == 0 & b == 0)
-                        //            continue;
-
-                        //        if (tileValues[turnDiskAI.X + a, turnDiskAI.Y + b] == currentOpponent)
-                        //        {
-                        //            //turnPotentials.Add(tiles[turnDiskAI.X + a, turnDiskAI.Y + b]);
-                        //            turnPotentials.Add(new Point(turnDiskAI.X + a, turnDiskAI.Y + b));
-                        //            KeepTurning(turnDiskAI.X + a, turnDiskAI.Y + b, a, b);
-                        //        }
-                        //    }
-                        //}
-
-
+                        MakeMove(tile);
                         transition = true;
                         timer = 0;
-                        //mostDisksAI = int.MinValue;
                     }
-                }
-                else if (KeyMouseReader.LeftClick())
-                {
-                    bool found = false;
-                    for (int x = 0; x < tiles.GetLength(0); x++)
-                    {
-                        if (found)
-                            break;
-                        for (int y = 0; y < tiles.GetLength(1); y++)
-                        {
-                            if (found)
-                                break;
-                            if (tiles[x, y].hitbox.Contains(KeyMouseReader.mouseState.Position))
-                            {
-                                if (placeables.Contains(tiles[x, y]))
-                                {                                    
-                                    tileValues[x, y] = currentPlayer;
-                                    
-                                    for (int a = -1; a < 2; a++)
-                                    {
-                                        for (int b = -1; b < 2; b++)
-                                        {
-                                            if (a == 0 & b == 0)
-                                                continue;
-
-                                            if (tiles[x + a, y + b].currentTile == currentOpponent)
-                                            {
-                                                turnPotentials.Add(new Point( x + a, y + b));
-                                                KeepTurning(x + a, y + b, a, b);
-                                            }
-                                        }
-                                    }
-                                    transition = true;
-                                    timer = 0;
-                                }
-                                else
-                                {
-                                    tiles[x, y].redCrossed = true;
-                                }
-                                found = true;
-                            }
-                        }
-                    }
+                    else
+                        tile.redCrossed = true;
                 }
                 else if (KeyMouseReader.KeyPressed(Keys.Space))
                 {
@@ -443,6 +382,49 @@ namespace OthelloMinMaxAI
             }
         }
 
+        private bool PressedATile(out Tile pressedTile)
+        {
+            pressedTile = null;
+            if (!KeyMouseReader.LeftClick()) 
+                return false;
+            for (int x = 0; x < tiles.GetLength(0); x++)
+            {
+                for (int y = 0; y < tiles.GetLength(1); y++)
+                {
+                    if (tiles[x, y].hitbox.Contains(KeyMouseReader.mouseState.Position))
+                    {
+                        pressedTile = tiles[x,y];
+                        return true;
+                    }
+                }
+            }
+            return false;
+        }
+
+        public void MakeMove(Point tile) => MakeMove(tile.X, tile.Y);
+
+        public void MakeMove(Tile tile) => MakeMove(tile.Index.X, tile.Index.Y);
+
+        private void MakeMove(int x, int y)
+        {
+            tileValues[x, y] = currentPlayer;
+            for (int a = -1; a < 2; a++)
+            {
+                for (int b = -1; b < 2; b++)
+                {
+                    if (a == 0 & b == 0)
+                        continue;
+
+                    if (tiles[x + a, y + b].currentTile == currentOpponent)
+                    {
+                        turnPotentials.Add(new Point(x + a, y + b));
+                        KeepTurning(x + a, y + b, a, b);
+                    }
+                }
+            }
+            FindPlaceables();
+        }
+
         public void SwitchSides()
         {
             if (currentPlayer == 1)
@@ -461,7 +443,6 @@ namespace OthelloMinMaxAI
             //lägg till logik för att den ska läsa av int array
 
             IntToTile(tileValues);
-
             FindPlaceables();
         }
 

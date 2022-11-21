@@ -35,15 +35,16 @@ namespace OthelloMinMaxAI
             currentGameState = GameState.MainMenu;
         }
 
-        public static void NewGame()
+        public static void NewGame(bool useAi)
         {
             graphics.PreferredBackBufferWidth = Constants.BoardSize * Constants.TileWidth;
             graphics.PreferredBackBufferHeight = Constants.BoardSize * Constants.TileWidth + 120;
             graphics.ApplyChanges();
 
             currentGameState = GameState.Play;
-            board = new Board();
+            board = new Board(useAi);
             board.FreshBoard();
+            Tree.InitializeTree(board.TileValues, 1);
         }
 
         public static void GameOver(int onePoints, int twoPoints, Tile[,] tiles)
