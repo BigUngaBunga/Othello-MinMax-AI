@@ -1,104 +1,102 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
-using System;
-using SpriteBatch = Microsoft.Xna.Framework.Graphics.SpriteBatch;
 
 namespace OthelloMinMaxAI
 {
+    /// <summary>
+    /// This is the main type for your game.
+    /// </summary>
     public class Game1 : Game
     {
-        public const int MAX_TREE_DEPTH = 5;
-        public const int GAMEBOARD_SIZE = 8;
-        public const int TILE_SIZE = 64;
-        public const int LINE_WIDTH = 4;
-        private GraphicsDeviceManager _graphics;
-        private SpriteBatch spriteBatch;
-        
-        public static Random random = new Random();
-        public static Texture2D circleTexture;
-        public static Texture2D rectangleTexture;
+        GraphicsDeviceManager graphics;
+        SpriteBatch spriteBatch;
 
-        private GameBoard game;
-        
+
+
 
         public Game1()
         {
-            _graphics = new GraphicsDeviceManager(this);
+            graphics = new GraphicsDeviceManager(this);
             Content.RootDirectory = "Content";
-            IsMouseVisible = true;
-            _graphics.PreferredBackBufferHeight = TILE_SIZE * GAMEBOARD_SIZE + 256;
-            _graphics.PreferredBackBufferWidth = TILE_SIZE * GAMEBOARD_SIZE;
-            //_graphics.ApplyChanges();
-        }
-        private Texture2D CreateRectangleTexture(int width, int height, int lineWidth, Color lineColor)
-        {
-            Texture2D texture = new Texture2D(GraphicsDevice, width, height);
-
-            Color[] colors = new Color[width * height];
-
-            for (int y = 0; y < height; y++)
-            {
-                for (int x = 0; x < width; x++)
-                {
-                    int index = y * width + x;
-                    if (x == 0 || x >= width - lineWidth || y == 0 || y >= height - lineWidth)
-                    {
-                        colors[index] = lineColor;
-                    }
-                    else
-                    {
-                        colors[index] = Color.Transparent;
-                    }
-                }
-            }
-
-            texture.SetData(colors);
-
-
-            return texture;
         }
 
+        /// <summary>
+        /// Allows the game to perform any initialization it needs to before starting to run.
+        /// This is where it can query for any required services and load any non-graphic
+        /// related content.  Calling base.Initialize will enumerate through any components
+        /// and initialize them as well.
+        /// </summary>
         protected override void Initialize()
         {
-            // TODO: Add your initialization logic here
 
-            game = new GameBoard(GAMEBOARD_SIZE, GAMEBOARD_SIZE);
 
             base.Initialize();
         }
 
+        /// <summary>
+        /// LoadContent will be called once per game and is the place to load
+        /// all of your content.
+        /// </summary>
         protected override void LoadContent()
         {
+            // Create a new SpriteBatch, which can be used to draw textures.
             spriteBatch = new SpriteBatch(GraphicsDevice);
-            circleTexture = Content.Load<Texture2D>(@"Textures\WhiteCircle");
-            rectangleTexture = CreateRectangleTexture(TILE_SIZE, TILE_SIZE, LINE_WIDTH, Color.Black);
+
+            SpriteClass.LoadContent(Content);
+            Constants.LoadConstants();
+            CustomTextClass.LoadClass(GraphicsDevice, spriteBatch);
+            GameManager.Initialization(graphics, Window);
+
+            IsMouseVisible = true;
+
+
 
             // TODO: use this.Content to load your game content here
         }
 
 
+        /// <summary>
+        /// UnloadContent will be called once per game and is the place to unload
+        /// game-specific content.
+        /// </summary>
+        protected override void UnloadContent()
+        {
+            // TODO: Unload any non ContentManager content here
+        }
 
+        /// <summary>
+        /// Allows the game to run logic such as updating the world,
+        /// checking for collisions, gathering input, and playing audio.
+        /// </summary>
+        /// <param name="gameTime">Provides a snapshot of timing values.</param>
         protected override void Update(GameTime gameTime)
         {
             if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Keyboard.GetState().IsKeyDown(Keys.Escape))
                 Exit();
+
+            KeyMouseReader.Update();
+
+            GameManager.Update(gameTime);
 
             // TODO: Add your update logic here
 
             base.Update(gameTime);
         }
 
+        /// <summary>
+        /// This is called when the game should draw itself.
+        /// </summary>
+        /// <param name="gameTime">Provides a snapshot of timing values.</param>
         protected override void Draw(GameTime gameTime)
         {
-            GraphicsDevice.Clear(Color.DarkGreen);
+            GraphicsDevice.Clear(Color.Gray);
 
             spriteBatch.Begin();
 
-            game.Draw(spriteBatch);
+            GameManager.Draw(spriteBatch);
 
             spriteBatch.End();
-
 
             base.Draw(gameTime);
         }
