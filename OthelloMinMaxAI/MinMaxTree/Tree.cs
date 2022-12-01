@@ -29,18 +29,20 @@ namespace OthelloMinMaxAI
         public static Point GetMove(int[,] currentGameState)
         {
             if (root.Move != emptyMove && root.HasChildWithState(currentGameState, out Node node))
-            {
-                root = node;
-                root.ExpandTree();
-            }
+                MoveRootTo(node);
             alpha = int.MinValue;
             beta = int.MaxValue;
             root.TraverseTree(ref alpha, ref beta, out int depthVisited, out int nodesSearched);
             //TODO skriv ut depthVisited och nodesSearched
-            root = root.BestChild;
-            root.ExpandTree();
+            MoveRootTo(root.BestChild);
 
             return root.Move;
+        }
+
+        private static void MoveRootTo(Node node)
+        {
+            root = node;
+            root.ExpandTree();
         }
     }
 }

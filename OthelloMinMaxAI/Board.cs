@@ -321,6 +321,7 @@ namespace OthelloMinMaxAI
                             {
                                 if (pointsToTurn.Contains(new Point(x, y)))
                                 {
+                                    //TODO kolla varför spel ibland använder fel aktiv spelare
                                     tileValues[x, y] = currentPlayer;
                                 }
                             }

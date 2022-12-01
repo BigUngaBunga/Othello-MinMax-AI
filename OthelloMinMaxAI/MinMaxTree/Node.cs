@@ -75,7 +75,7 @@ namespace OthelloMinMaxAI
             depth--;
             for (int i = 0; i < children.Count; i++)
                 children[i].ExpandTree();
-            if (isLeaf)
+            if (isLeaf && viableMoves.Count > 0)
                 CreateChildren();
         }
 
