@@ -11,8 +11,6 @@ namespace OthelloMinMaxAI
     {
         private static List<Point> turnPotentials, pointsToTurn;
         private static HashSet<Point> placables;
-        //private static int[,] gameState;
-
 
         public static void MakeMove(int[,] gameState, int player, int opponent, Point move)
         {

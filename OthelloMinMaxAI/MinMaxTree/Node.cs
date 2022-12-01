@@ -36,7 +36,7 @@ namespace OthelloMinMaxAI
             Player = player;
             this.move = move;
             if(move.X != -1 && move.Y != -1)
-                AiBoard.MakeMove(this.gameState, Player, OppositePlayer, move);
+                AiBoard.MakeMove(this.gameState, OppositePlayer, Player, move);
             viableMoves = AiBoard.FindPlaceables(this.gameState, Player, OppositePlayer);
             EvaluateLeafStatus();
         }
@@ -48,8 +48,10 @@ namespace OthelloMinMaxAI
             value = AiBoard.CalculateComparativeScore(gameState, Player);
         }
 
-        public virtual void TraverseTree(ref int alpha, ref int beta)
+        public virtual void TraverseTree(ref int alpha, ref int beta, out int depthVisited, out int nodesSearched)
         {
+            depthVisited = 0;
+            nodesSearched = 1;
         }
 
         protected virtual void CreateChildren()
@@ -72,44 +74,36 @@ namespace OthelloMinMaxAI
         {
             depth--;
             for (int i = 0; i < children.Count; i++)
-            {
                 children[i].ExpandTree();
-            }
             if (isLeaf)
                 CreateChildren();
         }
 
-        public bool GameStateIsSame(int[,] compareGameState)//=> compareGameState.Equals(gameState);
+        public bool GameStateIsSame(int[,] compareGameState)
         {
             for (int x = 0; x < compareGameState.GetLength(0); x++)
-            {
                 for (int y = 0; y < compareGameState.GetLength(1); y++)
-                {
                     if (gameState[x, y] != compareGameState[x, y])
                         return false;
-                }
-            }
             return true;
         }
 
-        public bool HasNodeWithState(int[,] targetGameState, out Node node)
+        public bool HasChildWithState(int[,] targetGameState, out Node node)
         {
             node = null;
-            if (isLeaf)
-            {
-                if (!GameStateIsSame(targetGameState))
-                    return false;
-                node = this;
-                return true;
-            }
-
             foreach(var child in children)
             {
-                if (child.HasNodeWithState(targetGameState, out Node childNode))
+                if (child.HasChildWithState(targetGameState, out Node childNode))
                 {
                     node = childNode;
                     return true;
                 }
+            }
+           
+            if (GameStateIsSame(targetGameState))
+            {
+                node = this;
+                return true;
             }
             return false;
         }

@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Input;
+using DisplayType = OthelloMinMaxAI.Tile.DisplayState;
 
 namespace OthelloMinMaxAI
 {
@@ -13,9 +14,9 @@ namespace OthelloMinMaxAI
     {
         public List<Tile> Placeables { get; private set; }
 
-        private bool useAi;
-        float timer, timeToHelp, flashTimer, timeToFlash;
-        int currentPlayer, currentOpponent, lockDetection, onePoints, twoPoints;
+        private bool useAi, currentlyAi;
+        private float timer;
+        private int currentPlayer, currentOpponent, lockDetection, onePoints, twoPoints;
 
         Tile[,] tiles;
         int[,] tileValues;
@@ -29,8 +30,10 @@ namespace OthelloMinMaxAI
 
         int /*mostDisksAI,*/ countDisksAI;
         Point turnDiskAI;
-        float timeAI = 5;
+        float timeAI = 1;
 
+
+        private DisplayType currentDisplayType => (useAi && currentlyAi) ? DisplayType.AI : DisplayType.Player;
 
         public Board(bool useAi)
         {
@@ -45,9 +48,6 @@ namespace OthelloMinMaxAI
 
             timerDirection = 1;
             diskAnimationInterval = 0.05f;
-
-            timeToHelp = 1;
-            timeToFlash = 0.25f;
         }
 
         public int[,] TileValues => tileValues;
@@ -86,36 +86,6 @@ namespace OthelloMinMaxAI
             SwitchSides();
         }
 
-
-        /// <summary>
-        /// The x represents x, the y represents the y, the z represents the amount of points the placeable location yield.
-        /// </summary>
-        /// <param name="map"></param>
-        /// <param name="currPlayer"></param>
-        /// <param name="currOpponent"></param>
-        /// <returns></returns>
-        //public List<Vector3> validPlaces(int[,] map, int currPlayer, int currOpponent)
-        //{
-        //    List<Vector3> places = new List<Vector3>();
-
-        //    for(int x=0; x<map.GetLength(0); x++)
-        //    {
-        //        for (int y = 0; y < map.GetLength(1); y++)
-        //        {
-        //            if (map[x, y] == currentPlayer)
-        //            {
-
-        //            }
-        //        }
-        //    }       
-
-
-        //}
-
-
-        
-
-
         /// <summary>
         /// Finds placeables that the player can press. May be replaced!
         /// </summary>
@@ -124,9 +94,7 @@ namespace OthelloMinMaxAI
             ShowValidMoves(false);
 
             Placeables.Clear();
-
             timer = 0;
-            flashTimer = 0;
 
             for (int x = 0; x < tileValues.GetLength(0); x++)
             {
@@ -155,7 +123,6 @@ namespace OthelloMinMaxAI
 
             if (lockDetection >= 2)
             {
-                //EndGame();
                 enterEndGame = true;
             }
             else if (Placeables.Count == 0)
@@ -172,7 +139,7 @@ namespace OthelloMinMaxAI
         private void ShowValidMoves(bool showMove)
         {
             foreach (Tile t in Placeables)
-                t.showPlace = showMove;
+                t.displayState = showMove ? currentDisplayType : DisplayType.None;
         }
 
         /// <summary>
@@ -253,10 +220,7 @@ namespace OthelloMinMaxAI
         /// </summary>
         public void EndGame()
         {
-            foreach (Tile tile in Placeables)
-            {
-                tile.showPlace = false;
-            }
+            ShowValidMoves(false);
 
             Placeables.Clear();
 
@@ -300,15 +264,16 @@ namespace OthelloMinMaxAI
             if (!transition)
             {
                 timer += (float)gameTime.ElapsedGameTime.TotalSeconds;
-                if (useAi && currentPlayer == 1) //ska vara 2
+                if (useAi && currentPlayer == 1)
                 {
-                    Point move = Tree.GetMove(TileValues);
-                    MakeMove(move);
-                    transition = true;
-                    timer = 0;
-                    //if (timer >= timeAI)
-                    //{
-                    //}
+                    if (timer > timeAI)
+                    {
+                        Point move = Tree.GetMove(TileValues);
+                        MakeMove(move);
+                        transition = true;
+                        timer = 0;
+
+                    }
                 }
                 else if (PressedATile(out Tile tile))
                 {
@@ -334,10 +299,6 @@ namespace OthelloMinMaxAI
                 {
                     timer = 0;
                     currentDiskFrame += timerDirection;
-                    //foreach (Point p in pointsToTurn)
-                    //{
-                    //    t.currentDiskIndex = currentDiskFrame;
-                    //}
 
                     for(int x = 0; x < tileValues.GetLength(0); x++)
                     {
@@ -364,10 +325,6 @@ namespace OthelloMinMaxAI
                                 }
                             }
                         }
-                        //foreach (Tile t in disksToTurn)
-                        //{
-                        //    t.TurnDisc(currentPlayer, currentOpponent);
-                        //}
                         SwitchSides();
                     }
                     else if (currentDiskFrame <= 0)
@@ -431,12 +388,14 @@ namespace OthelloMinMaxAI
             {
                 currentPlayer = 2;
                 currentOpponent = 1;
+                currentlyAi = false;
                 GameManager.UpdateWindowTitle("Player 2's turn!");
             }
             else
             {
                 currentPlayer = 1;
                 currentOpponent = 2;
+                currentlyAi = true;
                 GameManager.UpdateWindowTitle("Player 1's turn!");
             }
 

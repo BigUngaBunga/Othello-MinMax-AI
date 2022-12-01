@@ -12,6 +12,8 @@ namespace OthelloMinMaxAI
 
     class Tile
     {
+        public enum DisplayState { None, Player, AI};
+
         public Point Location { get; }
         public Point Index { get; private set; }
         Color color;
@@ -20,9 +22,9 @@ namespace OthelloMinMaxAI
 
         public Rectangle hitbox;
 
-        public bool redCrossed, showPlace;
+        public bool redCrossed;
 
-        //public bool isBorder;
+        public DisplayState displayState;
 
         public int currentDiskIndex;
 
@@ -32,7 +34,7 @@ namespace OthelloMinMaxAI
         /// 0 equals empty. 1 equals Dark. 2 equals Light. 3 equals Border.
         /// </summary>
         public int currentTile;
-
+            
         public Tile(int X, int Y)
         {
             Index = new Point(X, Y);
@@ -61,32 +63,6 @@ namespace OthelloMinMaxAI
             currentTile = playerValue;
         }
 
-        //public void TurnDisc(int player, int opponent)
-        //{
-        //    if (player == 0)
-        //    {
-        //        color = Color.Transparent;
-        //    }
-        //    if (player == 1)
-        //    {
-        //        color = Menu.playerOne.color;
-        //    }
-        //    else if (player == 2)
-        //    {
-        //        color = Menu.playerTwo.color;
-        //    }
-        //    currentTile = player;
-        //    GameManager.board.UpdatePoints(player, opponent);
-        //}
-
-
-        //public void IsBorder()
-        //{
-        //    tileColor = Color.Black;
-        //    //isBorder = true;
-        //    currentTile = -1;
-        //}
-
         public void Draw(SpriteBatch sb)
         {
             Rectangle source = new Rectangle(SpriteClass.Disk.Width * currentDiskIndex / (maxDiskIndex + 1), 0, SpriteClass.Disk.Width / (maxDiskIndex + 1), SpriteClass.Disk.Height);
@@ -98,10 +74,18 @@ namespace OthelloMinMaxAI
             }
             else
             {
-                if (showPlace)
-                    sb.Draw(SpriteClass.Tile, hitbox, Color.LightGray);
-                else
-                    sb.Draw(SpriteClass.Tile, hitbox, tileColor);
+                switch (displayState)
+                {
+                    case DisplayState.Player:
+                        sb.Draw(SpriteClass.Tile, hitbox, Color.LightGray);
+                        break;
+                    case DisplayState.AI:
+                        sb.Draw(SpriteClass.Tile, hitbox, Color.DarkGoldenrod);
+                        break;
+                    default:
+                        sb.Draw(SpriteClass.Tile, hitbox, tileColor);
+                        break;
+                }
                 sb.Draw(SpriteClass.Disk, hitbox, source, color);
             }
             

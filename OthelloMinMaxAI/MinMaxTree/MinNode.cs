@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 using System.Threading;
+using System.Xml.Linq;
 
 namespace OthelloMinMaxAI
 {
@@ -21,19 +22,23 @@ namespace OthelloMinMaxAI
             }
         }
 
-        public override void TraverseTree(ref int alpha, ref int beta)
+        public override void TraverseTree(ref int alpha, ref int beta, out int depthVisited, out int nodesSearched)
         {
-            foreach (Node node in children)
+            nodesSearched = 1;
+            depthVisited = depth;
+
+            for (int i = children.Count - 1; i >= 0; i--)
             {
-                node.CalculateValue();
+                //children[i].TraverseTree(ref alpha, ref beta, out depthVisited, out int _nodesSearched);
+                //nodesSearched += _nodesSearched;
+                children[i].CalculateValue();
+
                 if (alpha >= beta)
+                    children.RemoveAt(i);
+                else if (beta > children[i].Value)
                 {
-                    node.isPruned = true;
-                }
-                else if (beta > node.Value)
-                {
-                    bestChild = node;
-                    value = beta = node.Value;
+                    bestChild = children[i];
+                    value = beta = children[i].Value;
                 }
             }
         }

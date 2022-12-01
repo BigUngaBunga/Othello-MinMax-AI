@@ -16,10 +16,14 @@ namespace OthelloMinMaxAI
             
         }
 
-        public override void TraverseTree(ref int alpha, ref int beta)
+        public override void TraverseTree(ref int alpha, ref int beta, out int depthVisited, out int nodesSearched)
         {
+            nodesSearched = 1;
+            depthVisited = depth;
             foreach (Node node in children)
             {
+                //node.TraverseTree(ref alpha, ref beta, out depthVisited, out int _nodesSearched);
+                //nodesSearched += _nodesSearched;
                 node.CalculateValue();
                 if (alpha < node.Value)
                 {

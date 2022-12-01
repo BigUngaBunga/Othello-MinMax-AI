@@ -1,6 +1,7 @@
 ﻿using Microsoft.Xna.Framework;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Text;
 
 namespace OthelloMinMaxAI
@@ -11,11 +12,13 @@ namespace OthelloMinMaxAI
         private static Node root;
         private static int[,] gameState;
         private static int alpha, beta;
+        private static Point emptyMove;
 
         public static void InitializeTree(int[,] currentGameState, int AiPlayerIndex)
         {
             gameState = currentGameState;
-            root = new MaxNode(gameState, new Point(-1, -1), false, 0, AiPlayerIndex);
+            emptyMove = new Point(-1, -1);
+            root = new MaxNode(gameState, emptyMove, false, 0, AiPlayerIndex);
         }
 
         /// <summary>
@@ -25,14 +28,15 @@ namespace OthelloMinMaxAI
         /// <returns></returns>
         public static Point GetMove(int[,] currentGameState)
         {
-            if (!root.GameStateIsSame(currentGameState) && root.HasNodeWithState(currentGameState, out Node node))
+            if (root.Move != emptyMove && root.HasChildWithState(currentGameState, out Node node))
             {
                 root = node;
                 root.ExpandTree();
             }
             alpha = int.MinValue;
             beta = int.MaxValue;
-            root.TraverseTree(ref alpha, ref beta);
+            root.TraverseTree(ref alpha, ref beta, out int depthVisited, out int nodesSearched);
+            //TODO skriv ut depthVisited och nodesSearched
             root = root.BestChild;
             root.ExpandTree();
 
