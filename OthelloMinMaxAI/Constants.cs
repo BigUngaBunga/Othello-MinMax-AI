@@ -12,7 +12,7 @@ namespace OthelloMinMaxAI
     {
         public static int BoardSize, TileWidth, ColorWidth, MaxTileSize, MinTileSize;
         public static Point MenuSize;
-        public const int MAX_TREE_DEPTH = 8;
+        public const int MAX_TREE_DEPTH = 6;
 
 
         public static void LoadConstants()
