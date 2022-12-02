@@ -33,6 +33,9 @@ namespace OthelloMinMaxAI
                     Value = beta = children[i].Value;
                 }
             }
+
+            if (bestChild == null && children.Count > 0)
+                bestChild = children[0];
         }
 
         protected override void CreateChildren()
