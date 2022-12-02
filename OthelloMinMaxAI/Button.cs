@@ -44,7 +44,7 @@ namespace OthelloMinMaxAI
         {
             buttonPressed = true;
             pressable = false;
-            currentFrame = 1;
+            currentFrame = 0;
             timer = timeTillUnpress;
         }
 
@@ -60,9 +60,9 @@ namespace OthelloMinMaxAI
             sb.Draw(tex, hitbox, source, color);
         }
 
-        public void ChangeColour(Color newColour, bool useColour)
+        public void ChangeColour(Color newColour, Color pickedColour, bool useColour)
         {
-            color = useColour ? newColour : Color.White;
+            color = useColour ? newColour : pickedColour;
         }
     }
 }

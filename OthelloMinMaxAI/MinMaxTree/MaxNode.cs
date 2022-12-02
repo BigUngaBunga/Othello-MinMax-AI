@@ -12,8 +12,6 @@ namespace OthelloMinMaxAI
         {
             if (IsLeaf) { CalculateValue(); }
             else { CreateChildren(); }
-
-            
         }
 
         public override void TraverseTree(int alpha, int beta, out int depthVisited, out int nodesSearched)

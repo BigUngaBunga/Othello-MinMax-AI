@@ -12,7 +12,7 @@ namespace OthelloMinMaxAI
         public List<Tile> Placeables { get; private set; }
         public int[,] TileValues => tileValues;
 
-        private int playerOnePoins, playerTwoPoins;
+        private int playerOnePoints, playerTwoPoints;
         private readonly bool useAi;
         private bool currentlyAi;
         private float timer;
@@ -20,9 +20,10 @@ namespace OthelloMinMaxAI
 
         private readonly Tile[,] tiles;
         private readonly int[,] tileValues;
-
-
         private readonly List<Point> turnPotentials, pointsToTurn;
+        private Tree tree;
+
+
 
         private bool transition, enterEndGame;
         private readonly float diskAnimationInterval;
@@ -78,7 +79,7 @@ namespace OthelloMinMaxAI
                 }
             }
             if (useAi)
-                Tree.GenerateTree(TileValues, 1);
+                tree = new Tree(TileValues, 1);
             SwitchSides();
         }
 
@@ -92,7 +93,7 @@ namespace OthelloMinMaxAI
                     if (timer > AiTimeDelay)
                     {
 
-                        Point move = Tree.GetMove(TileValues);
+                        Point move = tree.GetMove(TileValues);
                         MakeMove(move);
                         timer = 0;
 
@@ -200,8 +201,9 @@ namespace OthelloMinMaxAI
             {
                 tile.Draw(sb);
             }
-            sb.DrawString(SpriteClass.font, "Player 1 Score: " + playerOnePoins, new Vector2(Constants.TileWidth, Constants.TileWidth * Constants.BoardSize), Menu.playerOne.color);
-            sb.DrawString(SpriteClass.font, "Player 2 Score: " + playerTwoPoins, new Vector2(Constants.TileWidth, Constants.TileWidth * Constants.BoardSize + SpriteClass.font.MeasureString("I").Y + 5), Menu.playerTwo.color);
+            sb.DrawString(SpriteClass.font, "Player 1 Score: " + playerOnePoints, new Vector2(Constants.TileWidth, Constants.TileWidth * Constants.BoardSize), Menu.playerOne.color);
+            sb.DrawString(SpriteClass.font, "Player 2 Score: " + playerTwoPoints, new Vector2(Constants.TileWidth, Constants.TileWidth * Constants.BoardSize + SpriteClass.font.MeasureString("I").Y + 5), Menu.playerTwo.color);
+            sb.DrawString(SpriteClass.font, tree.LatestMoveDescription, new Vector2(Constants.TileWidth, Constants.TileWidth * Constants.BoardSize + SpriteClass.font.MeasureString("I").Y*3 + 5*3), Menu.playerTwo.color);
             if (currentPlayer == 1)
             {
                 sb.DrawString(SpriteClass.font, "Player 1's turn!", new Vector2(Constants.TileWidth, Constants.TileWidth * Constants.BoardSize + SpriteClass.font.MeasureString("I").Y * 2 + 10), Menu.playerOne.color);
@@ -260,7 +262,7 @@ namespace OthelloMinMaxAI
                 lockDetection++;
                 SwitchSides();
                 if (currentlyAi)
-                    Tree.GenerateTree(TileValues, 1);
+                    tree = new Tree(TileValues, 1);
             }
             else
             {
@@ -332,7 +334,7 @@ namespace OthelloMinMaxAI
 
             Placeables.Clear();
 
-            GameManager.GameOver(playerOnePoins, playerTwoPoins, tiles, useAi);
+            GameManager.GameOver(playerOnePoints, playerTwoPoints, tiles, useAi);
         }
 
         private void IntToTile(int[,] intTiles)
@@ -394,15 +396,15 @@ namespace OthelloMinMaxAI
 
         private void CalculatePoints()
         {
-            playerOnePoins = playerTwoPoins = 0;
+            playerOnePoints = playerTwoPoints = 0;
             for (int x = 0; x < TileValues.GetLength(0); x++)
             {
                 for (int y = 0; y < TileValues.GetLength(1); y++)
                 {
                     if (TileValues[x, y] == 1)
-                        playerOnePoins++;
+                        playerOnePoints++;
                     if (TileValues[x, y] == 2)
-                        playerTwoPoins++;
+                        playerTwoPoints++;
                 }
             }
         }
