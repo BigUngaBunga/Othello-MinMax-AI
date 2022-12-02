@@ -48,6 +48,7 @@ namespace OthelloMinMaxAI
             value = AiBoard.CalculateComparativeScore(gameState, Player);
         }
 
+        //TODO byt ut alpha och beta från ref till lokala variabler och uppdatera rätt variabel i rätt metod.
         public virtual void TraverseTree(ref int alpha, ref int beta, out int depthVisited, out int nodesSearched)
         {
             depthVisited = 0;

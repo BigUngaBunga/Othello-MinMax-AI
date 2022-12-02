@@ -35,10 +35,10 @@ namespace OthelloMinMaxAI
 
         ParticleEngine particleEngine1, particleEngine2;
 
-        public GameOver(int onePoints, int twoPoints, Tile[,] tiles)
+        public GameOver(int onePoints, int twoPoints, Tile[,] tiles, bool usedAI)
         {
-            playerOneName = "Player 1";
-            playerTwoName = "Player 2";
+            playerOneName = usedAI ? "The AI" : "Player 1";
+            playerTwoName = usedAI ? "The player" : "Player 2";
 
             //buttonManager = new ButtonManager();
             //startButton = new Button(SpriteClass.StartButton, new Point(Constants.MenuSize.X / 2 - 64, Constants.MenuSize.Y * 3 / 4), new Point(128, 64), 0.5f);

@@ -14,7 +14,7 @@ namespace OthelloMinMaxAI
         private static int alpha, beta;
         private static Point emptyMove;
 
-        public static void InitializeTree(int[,] currentGameState, int AiPlayerIndex)
+        public static void GenerateTree(int[,] currentGameState, int AiPlayerIndex)
         {
             gameState = currentGameState;
             emptyMove = new Point(-1, -1);

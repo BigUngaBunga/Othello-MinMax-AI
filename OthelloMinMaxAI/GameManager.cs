@@ -43,14 +43,13 @@ namespace OthelloMinMaxAI
 
             currentGameState = GameState.Play;
             board = new Board(useAi);
-            board.FreshBoard();
-            Tree.InitializeTree(board.TileValues, 1);
+            board.ResetBoard();
         }
 
-        public static void GameOver(int onePoints, int twoPoints, Tile[,] tiles)
+        public static void GameOver(int onePoints, int twoPoints, Tile[,] tiles, bool usedAI)
         {
             currentGameState = GameState.GameOver;
-            gameOver = new GameOver(onePoints, twoPoints, tiles);
+            gameOver = new GameOver(onePoints, twoPoints, tiles, usedAI);
         }
 
         public static void UpdateWindowTitle(string text)

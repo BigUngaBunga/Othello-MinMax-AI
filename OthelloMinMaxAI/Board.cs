@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Collections.Generic;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Input;
@@ -13,27 +9,28 @@ namespace OthelloMinMaxAI
     class Board
     {
         public List<Tile> Placeables { get; private set; }
+        public int[,] TileValues => tileValues;
 
-        private bool useAi, currentlyAi;
+        private int playerOnePoins, playerTwoPoins;
+        private readonly bool useAi;
+        private bool currentlyAi;
         private float timer;
-        private int currentPlayer, currentOpponent, lockDetection, onePoints, twoPoints;
+        private int currentPlayer, currentOpponent, lockDetection;
 
-        Tile[,] tiles;
-        int[,] tileValues;
-
-
-        List<Point> turnPotentials, pointsToTurn;
-
-        bool transition, enterEndGame;
-        float diskAnimationInterval;
-        int timerDirection, currentDiskFrame;
-
-        int /*mostDisksAI,*/ countDisksAI;
-        Point turnDiskAI;
-        float timeAI = 1;
+        private readonly Tile[,] tiles;
+        private readonly int[,] tileValues;
 
 
-        private DisplayType currentDisplayType => (useAi && currentlyAi) ? DisplayType.AI : DisplayType.Player;
+        private readonly List<Point> turnPotentials, pointsToTurn;
+
+        private bool transition, enterEndGame;
+        private readonly float diskAnimationInterval;
+        private int timerDirection, currentDiskFrame;
+
+        private readonly float AiTimeDelay = 1;
+
+
+        private DisplayType CurrentDisplayType => (useAi && currentlyAi) ? DisplayType.AI : DisplayType.Player;
 
         public Board(bool useAi)
         {
@@ -50,12 +47,8 @@ namespace OthelloMinMaxAI
             diskAnimationInterval = 0.05f;
         }
 
-        public int[,] TileValues => tileValues;
 
-        /// <summary>
-        /// Reset the board to the start.
-        /// </summary>
-        public void FreshBoard()
+        public void ResetBoard()
         {
             for (int x = 0; x < tileValues.GetLength(0); x++)
             {
@@ -83,13 +76,145 @@ namespace OthelloMinMaxAI
                     }
                 }
             }
+            if (useAi)
+                Tree.GenerateTree(TileValues, 1);
             SwitchSides();
         }
+
+        public void Update(GameTime gameTime)
+        {
+            timer += (float)gameTime.ElapsedGameTime.TotalSeconds;
+            if (!transition)
+            {
+                if (useAi && currentPlayer == 1)
+                {
+                    if (timer > AiTimeDelay)
+                    {
+                        Point move = Tree.GetMove(TileValues);
+                        MakeMove(move);
+                        timer = 0;
+
+                    }
+                }
+                else if (PressedATile(out Tile tile))
+                {
+                    if (Placeables.Contains(tile))
+                    {
+                        MakeMove(tile);
+                        timer = 0;
+                    }
+                    else
+                        tile.redCrossed = true;
+                }
+                else if (KeyMouseReader.KeyPressed(Keys.Space))
+                {
+                    enterEndGame = true;
+                    EndGame();
+                }
+            }
+            else
+            {
+                if (timer >= diskAnimationInterval)
+                {
+                    timer = 0;
+                    currentDiskFrame += timerDirection;
+
+                    for (int x = 0; x < tileValues.GetLength(0); x++)
+                    {
+                        for (int y = 0; y < tileValues.GetLength(1); y++)
+                        {
+                            if (pointsToTurn.Contains(new Point(x, y)))
+                            {
+                                tiles[x, y].currentDiskIndex = currentDiskFrame;
+                            }
+                        }
+                    }
+
+                    if (currentDiskFrame >= Tile.maxDiskIndex)
+                    {
+                        timerDirection = -1;
+
+                        for (int x = 0; x < tileValues.GetLength(0); x++)
+                        {
+                            for (int y = 0; y < tileValues.GetLength(1); y++)
+                            {
+                                if (pointsToTurn.Contains(new Point(x, y)))
+                                {
+                                    //TODO kolla varför spel ibland använder fel aktiv spelare
+                                    tileValues[x, y] = currentPlayer;
+                                }
+                            }
+                        }
+                        SwitchSides();
+                    }
+                    else if (currentDiskFrame <= 0)
+                    {
+                        timerDirection = 1;
+                        transition = false;
+                        pointsToTurn.Clear();
+                        if (enterEndGame)
+                            EndGame();
+                    }
+                }
+            }
+        }
+        public void SwitchSides()
+        {
+            if (currentPlayer == 1)
+            {
+                currentPlayer = 2;
+                currentOpponent = 1;
+                currentlyAi = false;
+                GameManager.UpdateWindowTitle("Player 2's turn!");
+            }
+            else
+            {
+                currentPlayer = 1;
+                currentOpponent = 2;
+                currentlyAi = true;
+                GameManager.UpdateWindowTitle("Player 1's turn!");
+            }
+
+            //lägg till logik för att den ska läsa av int array
+
+            IntToTile(tileValues);
+            FindPlaceables();
+            SkipTurnIfNoMoves();
+            CalculatePoints();
+        }
+        public Color GetCurrentColor()
+        {
+            if (enterEndGame)
+                return Color.Gray;
+            else if (currentPlayer == 1)
+                return Menu.playerOne.color;
+            else
+                return Menu.playerTwo.color;
+        }
+
+        public void Draw(SpriteBatch sb)
+        {
+            foreach (Tile tile in tiles)
+            {
+                tile.Draw(sb);
+            }
+            sb.DrawString(SpriteClass.font, "Player 1 Score: " + playerOnePoins, new Vector2(Constants.TileWidth, Constants.TileWidth * Constants.BoardSize), Menu.playerOne.color);
+            sb.DrawString(SpriteClass.font, "Player 2 Score: " + playerTwoPoins, new Vector2(Constants.TileWidth, Constants.TileWidth * Constants.BoardSize + SpriteClass.font.MeasureString("I").Y + 5), Menu.playerTwo.color);
+            if (currentPlayer == 1)
+            {
+                sb.DrawString(SpriteClass.font, "Player 1's turn!", new Vector2(Constants.TileWidth, Constants.TileWidth * Constants.BoardSize + SpriteClass.font.MeasureString("I").Y * 2 + 10), Menu.playerOne.color);
+            }
+            else
+            {
+                sb.DrawString(SpriteClass.font, "Player 2's turn!", new Vector2(Constants.TileWidth, Constants.TileWidth * Constants.BoardSize + SpriteClass.font.MeasureString("I").Y * 2 + 10), Menu.playerTwo.color);
+            }
+        }
+
 
         /// <summary>
         /// Finds placeables that the player can press. May be replaced!
         /// </summary>
-        public void FindPlaceables()
+        private void FindPlaceables()
         {
             ShowValidMoves(false);
 
@@ -120,7 +245,10 @@ namespace OthelloMinMaxAI
             }
 
             ShowValidMoves(true);
+        }
 
+        private void SkipTurnIfNoMoves()
+        {
             if (lockDetection >= 2)
             {
                 enterEndGame = true;
@@ -129,6 +257,8 @@ namespace OthelloMinMaxAI
             {
                 lockDetection++;
                 SwitchSides();
+                if (currentlyAi)
+                    Tree.GenerateTree(TileValues, 1);
             }
             else
             {
@@ -139,7 +269,7 @@ namespace OthelloMinMaxAI
         private void ShowValidMoves(bool showMove)
         {
             foreach (Tile t in Placeables)
-                t.displayState = showMove ? currentDisplayType : DisplayType.None;
+                t.displayState = showMove ? CurrentDisplayType : DisplayType.None;
         }
 
         /// <summary>
@@ -151,11 +281,6 @@ namespace OthelloMinMaxAI
         /// <param name="b"> Direction in Y</param>
         private void KeepChecking(int x, int y, int a, int b)
         {
-            if (currentPlayer == 2)
-            {
-                countDisksAI++;
-            }
-
             if (tileValues[x + a, y + b] == currentOpponent)
             {
                 KeepChecking(x + a, y + b, a, b);
@@ -165,23 +290,7 @@ namespace OthelloMinMaxAI
                 if (!Placeables.Contains(tiles[x + a, y + b]))
                 {
                     Placeables.Add(tiles[x + a, y + b]);
-
-                    //if (activeAI && currentPlayer == 2)
-                    //{
-                    //    CheckTileValue(x + a, y + b);
-
-                    //    if (mostDisksAI < countDisksAI)
-                    //    {
-                    //        mostDisksAI = countDisksAI;
-                    //        countDisksAI = 0;
-                    //        turnDiskAI = new Point(x + a, y + b);
-                    //    }
-                    //}
                 }
-            }
-            else
-            {
-                countDisksAI = 0;
             }
         }
 
@@ -215,39 +324,16 @@ namespace OthelloMinMaxAI
             }
         }
 
-        /// <summary>
-        /// Spelet är över. Går till game over screen
-        /// </summary>
-        public void EndGame()
+        private void EndGame()
         {
             ShowValidMoves(false);
 
             Placeables.Clear();
 
-            GameManager.GameOver(onePoints, twoPoints, tiles);
+            GameManager.GameOver(playerOnePoins, playerTwoPoins, tiles, useAi);
         }
 
-
-        /// <summary>
-        /// uppdaterade points innan. bör nog bytas ut.
-        /// </summary>
-        /// <param name="pointMaker"></param>
-        /// <param name="pointLoser"></param>
-        public void UpdatePoints(int pointMaker, int pointLoser)
-        {
-            if (pointMaker == 1)
-                onePoints++;
-            else if (pointMaker == 2)
-                twoPoints++;
-
-            if (pointLoser == 1)
-                onePoints--;
-            else if (pointLoser == 2)
-                twoPoints--;
-        }
-
-
-        void IntToTile(int[,] intTiles)
+        private void IntToTile(int[,] intTiles)
         {
             for(int x = 0; x< intTiles.GetLength(0); x++)
             {
@@ -259,86 +345,7 @@ namespace OthelloMinMaxAI
         }
 
 
-        public void Update(GameTime gameTime)
-        {
-            if (!transition)
-            {
-                timer += (float)gameTime.ElapsedGameTime.TotalSeconds;
-                if (useAi && currentPlayer == 1)
-                {
-                    if (timer > timeAI)
-                    {
-                        Point move = Tree.GetMove(TileValues);
-                        MakeMove(move);
-                        transition = true;
-                        timer = 0;
-
-                    }
-                }
-                else if (PressedATile(out Tile tile))
-                {
-                    if (Placeables.Contains(tile))
-                    {
-                        MakeMove(tile);
-                        transition = true;
-                        timer = 0;
-                    }
-                    else
-                        tile.redCrossed = true;
-                }
-                else if (KeyMouseReader.KeyPressed(Keys.Space))
-                {
-                    enterEndGame = true;
-                    EndGame();
-                }
-            }
-            else
-            {
-                timer += (float)gameTime.ElapsedGameTime.TotalSeconds;
-                if (timer >= diskAnimationInterval)
-                {
-                    timer = 0;
-                    currentDiskFrame += timerDirection;
-
-                    for(int x = 0; x < tileValues.GetLength(0); x++)
-                    {
-                        for (int y = 0; y < tileValues.GetLength(1); y++)
-                        {
-                            if(pointsToTurn.Contains(new Point(x, y)))
-                            {
-                                tiles[x,y].currentDiskIndex=currentDiskFrame;
-                            }
-                        }
-                    }
-
-                    if (currentDiskFrame >= Tile.maxDiskIndex)
-                    {
-                        timerDirection = -1;
-                        
-                        for (int x = 0; x < tileValues.GetLength(0); x++)
-                        {
-                            for (int y = 0; y < tileValues.GetLength(1); y++)
-                            {
-                                if (pointsToTurn.Contains(new Point(x, y)))
-                                {
-                                    //TODO kolla varför spel ibland använder fel aktiv spelare
-                                    tileValues[x, y] = currentPlayer;
-                                }
-                            }
-                        }
-                        SwitchSides();
-                    }
-                    else if (currentDiskFrame <= 0)
-                    {
-                        timerDirection = 1;
-                        transition = false;
-                        pointsToTurn.Clear();
-                        if (enterEndGame)
-                            EndGame();
-                    }
-                }
-            }
-        }
+        
 
         private bool PressedATile(out Tile pressedTile)
         {
@@ -359,9 +366,9 @@ namespace OthelloMinMaxAI
             return false;
         }
 
-        public void MakeMove(Point tile) => MakeMove(tile.X, tile.Y);
+        private void MakeMove(Point tile) => MakeMove(tile.X, tile.Y);
 
-        public void MakeMove(Tile tile) => MakeMove(tile.Index.X, tile.Index.Y);
+        private void MakeMove(Tile tile) => MakeMove(tile.Index.X, tile.Index.Y);
 
         private void MakeMove(int x, int y)
         {
@@ -380,58 +387,23 @@ namespace OthelloMinMaxAI
                     }
                 }
             }
-            FindPlaceables();
+            transition = true;
         }
 
-        public void SwitchSides()
+        private void CalculatePoints()
         {
-            if (currentPlayer == 1)
+            playerOnePoins = playerTwoPoins = 0;
+            for (int x = 0; x < TileValues.GetLength(0); x++)
             {
-                currentPlayer = 2;
-                currentOpponent = 1;
-                currentlyAi = false;
-                GameManager.UpdateWindowTitle("Player 2's turn!");
-            }
-            else
-            {
-                currentPlayer = 1;
-                currentOpponent = 2;
-                currentlyAi = true;
-                GameManager.UpdateWindowTitle("Player 1's turn!");
-            }
-
-            //lägg till logik för att den ska läsa av int array
-
-            IntToTile(tileValues);
-            FindPlaceables();
-        }
-
-        public Color GetCurrentColor()
-        {
-            if (enterEndGame)
-                return Color.Gray;
-            else if (currentPlayer == 1)
-                return Menu.playerOne.color;
-            else
-                return Menu.playerTwo.color;
-        }
-
-        public void Draw(SpriteBatch sb)
-        {
-            foreach (Tile tile in tiles)
-            {
-                tile.Draw(sb);
-            }
-            sb.DrawString(SpriteClass.font, "Player 1 Score: " + onePoints, new Vector2(Constants.TileWidth, Constants.TileWidth * Constants.BoardSize), Menu.playerOne.color);
-            sb.DrawString(SpriteClass.font, "Player 2 Score: " + twoPoints, new Vector2(Constants.TileWidth, Constants.TileWidth * Constants.BoardSize + SpriteClass.font.MeasureString("I").Y + 5), Menu.playerTwo.color);
-            if (currentPlayer == 1)
-            {
-                sb.DrawString(SpriteClass.font, "Player 1's turn!", new Vector2(Constants.TileWidth, Constants.TileWidth * Constants.BoardSize + SpriteClass.font.MeasureString("I").Y * 2 + 10), Menu.playerOne.color);
-            }
-            else
-            {
-                sb.DrawString(SpriteClass.font, "Player 2's turn!", new Vector2(Constants.TileWidth, Constants.TileWidth * Constants.BoardSize + SpriteClass.font.MeasureString("I").Y * 2 + 10), Menu.playerTwo.color);
+                for (int y = 0; y < TileValues.GetLength(1); y++)
+                {
+                    if (TileValues[x, y] == 1)
+                        playerOnePoins++;
+                    if (TileValues[x, y] == 2)
+                        playerTwoPoins++;
+                }
             }
         }
+
     }
 }
