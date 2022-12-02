@@ -1,3 +1,5 @@
+Github link: https://github.com/BigUngaBunga/Othello-MinMax-AI.git
+
 To run as an application no setup is required.
 To run the program in the editor the monogame framework must be downloaded.
 https://docs.monogame.net/articles/getting_started/1_setting_up_your_development_environment_windows.html
