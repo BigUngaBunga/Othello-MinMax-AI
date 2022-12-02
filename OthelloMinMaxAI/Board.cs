@@ -203,6 +203,7 @@ namespace OthelloMinMaxAI
             }
             sb.DrawString(SpriteClass.font, "Player 1 Score: " + playerOnePoins, new Vector2(Constants.TileWidth, Constants.TileWidth * Constants.BoardSize), Menu.playerOne.color);
             sb.DrawString(SpriteClass.font, "Player 2 Score: " + playerTwoPoins, new Vector2(Constants.TileWidth, Constants.TileWidth * Constants.BoardSize + SpriteClass.font.MeasureString("I").Y + 5), Menu.playerTwo.color);
+            sb.DrawString(SpriteClass.font, tree.LatestMoveDescription, new Vector2(Constants.TileWidth, Constants.TileWidth * Constants.BoardSize + SpriteClass.font.MeasureString("I").Y*3 + 5*3), Menu.playerTwo.color);
             if (currentPlayer == 1)
             {
                 sb.DrawString(SpriteClass.font, "Player 1's turn!", new Vector2(Constants.TileWidth, Constants.TileWidth * Constants.BoardSize + SpriteClass.font.MeasureString("I").Y * 2 + 10), Menu.playerOne.color);

@@ -12,12 +12,14 @@ namespace OthelloMinMaxAI
         private int[,] gameState;
         private int alpha, beta;
         private Point emptyMove;
+        public string LatestMoveDescription { get; private set; }
 
         public Tree(int[,] currentGameState, int AiPlayerIndex)
         {
             gameState = currentGameState;
             emptyMove = new Point(-1, -1);
             root = new MaxNode(gameState, emptyMove, false, 0, AiPlayerIndex);
+            LatestMoveDescription = "Has yet to perform a move";
         }
 
         /// <summary>
@@ -36,7 +38,7 @@ namespace OthelloMinMaxAI
             root.TraverseTree(alpha, beta, out int depthVisited, out int nodesSearched);
             MoveRootTo(root.BestChild);
             stopwatch.Stop();
-            Debug.WriteLine($"Search depth: {depthVisited}, nodes searched: {nodesSearched}. It took {stopwatch.ElapsedMilliseconds} milliseconds");
+            LatestMoveDescription = $"Search depth: {depthVisited}, nodes searched: {nodesSearched}. It took {stopwatch.ElapsedMilliseconds} milliseconds";
             return root.Move;
         }
 
