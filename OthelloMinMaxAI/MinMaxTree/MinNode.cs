@@ -9,39 +9,28 @@ namespace OthelloMinMaxAI
 {
     class MinNode : Node
     {
-        public MinNode(int[,] gameState, Point move, bool isLeaf, int depth, int player) : base(gameState, move, isLeaf, depth, player)
+        public MinNode(int[,] gameState, Point move, bool isLeaf, int parentDepth, int player) : base(gameState, move, isLeaf, parentDepth, player)
         {
             
-            if (isLeaf)
-            {
-                CalculateValue();
-            }
-            else
-            {
-                CreateChildren();
-            }
+            if (IsLeaf){CalculateValue();}
+            else{ CreateChildren(); }
         }
 
-        public override void TraverseTree(ref int alpha, ref int beta, out int depthVisited, out int nodesSearched)
+        public override void TraverseTree(int alpha, int beta, out int depthVisited, out int nodesSearched)
         {
             nodesSearched = 1;
             depthVisited = depth;
 
-            int deboogAlpha = 0;
-            int deboogBeta = 0;
-
             for (int i = children.Count - 1; i >= 0; i--)
             {
-                children[i].TraverseTree(ref deboogAlpha, ref deboogBeta, out depthVisited, out int _nodesSearched);
+                children[i].TraverseTree(alpha, beta, out depthVisited, out int _nodesSearched);
                 nodesSearched += _nodesSearched;
-                children[i].CalculateValue();
-
-                if (alpha >= beta)
-                    children.RemoveAt(i);
+                if (alpha >= children[i].Value)
+                    isPruned = true;
                 else if (beta > children[i].Value)
                 {
                     bestChild = children[i];
-                    value = beta = children[i].Value;
+                    Value = beta = children[i].Value;
                 }
             }
         }
@@ -52,6 +41,8 @@ namespace OthelloMinMaxAI
             {
                 children.Add(new MaxNode(gameState, move, (depth == Constants.MAX_TREE_DEPTH - 1), depth, OppositePlayer));
             }
+            if (children.Count > 0)
+                IsLeaf = false;
         }
     }
 }

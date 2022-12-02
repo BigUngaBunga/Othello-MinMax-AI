@@ -10,8 +10,8 @@ namespace OthelloMinMaxAI
     class Node
     {
         //Getters & Setters
-        public int Value => value;
-        public bool IsLeaf => isLeaf;
+        public int Value { get; protected set; }
+        public bool IsLeaf {get; protected set;}
         public int Player { get; private set; }
         public bool isPruned = false;
         public int OppositePlayer => Player == 1 ? 2 : 1;
@@ -21,17 +21,15 @@ namespace OthelloMinMaxAI
         protected int[,] gameState;
         protected Point move;
         protected int depth;
-        protected bool isLeaf;
-        protected int value;
         protected Node bestChild;
         protected List<Point> viableMoves = new List<Point>();
         protected List<Node> children;
 
-        public Node(int[,] gameState, Point move, bool isLeaf, int depth, int player)
+        public Node(int[,] gameState, Point move, bool isLeaf, int parentDepth, int player)
         {
             this.gameState = (int[,])gameState.Clone();
-            this.isLeaf = isLeaf;
-            this.depth = depth + 1;
+            IsLeaf = isLeaf;
+            this.depth = parentDepth + 1;
             children = new List<Node>();
             Player = player;
             this.move = move;
@@ -45,11 +43,11 @@ namespace OthelloMinMaxAI
 
         public void CalculateValue()
         {
-            value = AiBoard.CalculateComparativeScore(gameState, Player);
+            Value = AiBoard.CalculateComparativeScore(gameState, Player);
         }
 
         //TODO byt ut alpha och beta från ref till lokala variabler och uppdatera rätt variabel i rätt metod.
-        public virtual void TraverseTree(ref int alpha, ref int beta, out int depthVisited, out int nodesSearched)
+        public virtual void TraverseTree(int alpha, int beta, out int depthVisited, out int nodesSearched)
         {
             depthVisited = 0;
             nodesSearched = 1;
@@ -57,17 +55,20 @@ namespace OthelloMinMaxAI
 
         protected virtual void CreateChildren()
         {
+                
             foreach (Point move in viableMoves)
             {
                 children.Add(new MinNode(gameState, move, (depth == Constants.MAX_TREE_DEPTH - 1), depth, OppositePlayer));
             }
+            if (children.Count > 0)
+                IsLeaf = false;
         }
 
         protected void EvaluateLeafStatus()
         {
             if (viableMoves.Count == 0)
             {
-                isLeaf = true;
+                IsLeaf = true;
             }
         }
 
@@ -76,7 +77,7 @@ namespace OthelloMinMaxAI
             depth--;
             for (int i = 0; i < children.Count; i++)
                 children[i].ExpandTree();
-            if (isLeaf && viableMoves.Count > 0)
+            if (IsLeaf && viableMoves.Count > 0)
                 CreateChildren();
         }
 

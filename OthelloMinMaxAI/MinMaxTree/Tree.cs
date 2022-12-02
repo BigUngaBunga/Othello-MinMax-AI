@@ -31,7 +31,7 @@ namespace OthelloMinMaxAI
                 MoveRootTo(node);
             alpha = int.MinValue;
             beta = int.MaxValue;
-            root.TraverseTree(ref alpha, ref beta, out int depthVisited, out int nodesSearched);
+            root.TraverseTree(alpha, beta, out int depthVisited, out int nodesSearched);
             Debug.WriteLine($"Search depth: {depthVisited}, nodes searched: {nodesSearched}");
             MoveRootTo(root.BestChild);
             return root.Move;
