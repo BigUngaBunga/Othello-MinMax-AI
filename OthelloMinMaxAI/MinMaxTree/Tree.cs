@@ -27,13 +27,16 @@ namespace OthelloMinMaxAI
         /// <returns></returns>
         public static Point GetMove(int[,] currentGameState)
         {
+            Stopwatch stopwatch = new Stopwatch();
+            stopwatch.Start();
             if (root.Move != emptyMove && root.HasChildWithState(currentGameState, out Node node))
                 MoveRootTo(node);
             alpha = int.MinValue;
             beta = int.MaxValue;
             root.TraverseTree(alpha, beta, out int depthVisited, out int nodesSearched);
-            Debug.WriteLine($"Search depth: {depthVisited}, nodes searched: {nodesSearched}");
             MoveRootTo(root.BestChild);
+            stopwatch.Stop();
+            Debug.WriteLine($"Search depth: {depthVisited}, nodes searched: {nodesSearched}. It took {stopwatch.ElapsedMilliseconds} milliseconds");
             return root.Move;
         }
 

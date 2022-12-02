@@ -3,6 +3,7 @@ using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Input;
 using DisplayType = OthelloMinMaxAI.Tile.DisplayState;
+using System.Diagnostics;
 
 namespace OthelloMinMaxAI
 {
@@ -27,7 +28,7 @@ namespace OthelloMinMaxAI
         private readonly float diskAnimationInterval;
         private int timerDirection, currentDiskFrame;
 
-        private readonly float AiTimeDelay = 1;
+        private readonly float AiTimeDelay = 0;
 
 
         private DisplayType CurrentDisplayType => (useAi && currentlyAi) ? DisplayType.AI : DisplayType.Player;
@@ -90,6 +91,7 @@ namespace OthelloMinMaxAI
                 {
                     if (timer > AiTimeDelay)
                     {
+
                         Point move = Tree.GetMove(TileValues);
                         MakeMove(move);
                         timer = 0;
