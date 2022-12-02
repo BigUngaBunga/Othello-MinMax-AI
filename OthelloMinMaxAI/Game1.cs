@@ -12,8 +12,6 @@ namespace OthelloMinMaxAI
         GraphicsDeviceManager graphics;
         SpriteBatch spriteBatch;
 
-        public const int MAX_TREE_DEPTH = 5;
-
 
 
 

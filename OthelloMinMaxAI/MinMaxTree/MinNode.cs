@@ -27,10 +27,13 @@ namespace OthelloMinMaxAI
             nodesSearched = 1;
             depthVisited = depth;
 
+            int deboogAlpha = 0;
+            int deboogBeta = 0;
+
             for (int i = children.Count - 1; i >= 0; i--)
             {
-                //children[i].TraverseTree(ref alpha, ref beta, out depthVisited, out int _nodesSearched);
-                //nodesSearched += _nodesSearched;
+                children[i].TraverseTree(ref deboogAlpha, ref deboogBeta, out depthVisited, out int _nodesSearched);
+                nodesSearched += _nodesSearched;
                 children[i].CalculateValue();
 
                 if (alpha >= beta)
@@ -47,7 +50,7 @@ namespace OthelloMinMaxAI
         {
             foreach (Point move in viableMoves)
             {
-                children.Add(new MaxNode(gameState, move, (depth == Game1.MAX_TREE_DEPTH - 1), depth, OppositePlayer));
+                children.Add(new MaxNode(gameState, move, (depth == Constants.MAX_TREE_DEPTH - 1), depth, OppositePlayer));
             }
         }
     }

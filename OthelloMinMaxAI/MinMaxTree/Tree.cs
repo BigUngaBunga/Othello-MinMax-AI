@@ -2,7 +2,6 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Text;
 
 namespace OthelloMinMaxAI
 {
@@ -33,9 +32,8 @@ namespace OthelloMinMaxAI
             alpha = int.MinValue;
             beta = int.MaxValue;
             root.TraverseTree(ref alpha, ref beta, out int depthVisited, out int nodesSearched);
-            //TODO skriv ut depthVisited och nodesSearched
+            Debug.WriteLine($"Search depth: {depthVisited}, nodes searched: {nodesSearched}");
             MoveRootTo(root.BestChild);
-
             return root.Move;
         }
 

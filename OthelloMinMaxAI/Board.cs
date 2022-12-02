@@ -27,7 +27,7 @@ namespace OthelloMinMaxAI
         private readonly float diskAnimationInterval;
         private int timerDirection, currentDiskFrame;
 
-        private readonly float AiTimeDelay = 1;
+        private readonly float AiTimeDelay = 0;
 
 
         private DisplayType CurrentDisplayType => (useAi && currentlyAi) ? DisplayType.AI : DisplayType.Player;
