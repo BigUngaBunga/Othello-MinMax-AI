@@ -12,7 +12,7 @@ namespace OthelloMinMaxAI
         public List<Tile> Placeables { get; private set; }
         public int[,] TileValues => tileValues;
 
-        private int playerOnePoins, playerTwoPoins;
+        private int playerOnePoints, playerTwoPoints;
         private readonly bool useAi;
         private bool currentlyAi;
         private float timer;
@@ -201,8 +201,8 @@ namespace OthelloMinMaxAI
             {
                 tile.Draw(sb);
             }
-            sb.DrawString(SpriteClass.font, "Player 1 Score: " + playerOnePoins, new Vector2(Constants.TileWidth, Constants.TileWidth * Constants.BoardSize), Menu.playerOne.color);
-            sb.DrawString(SpriteClass.font, "Player 2 Score: " + playerTwoPoins, new Vector2(Constants.TileWidth, Constants.TileWidth * Constants.BoardSize + SpriteClass.font.MeasureString("I").Y + 5), Menu.playerTwo.color);
+            sb.DrawString(SpriteClass.font, "Player 1 Score: " + playerOnePoints, new Vector2(Constants.TileWidth, Constants.TileWidth * Constants.BoardSize), Menu.playerOne.color);
+            sb.DrawString(SpriteClass.font, "Player 2 Score: " + playerTwoPoints, new Vector2(Constants.TileWidth, Constants.TileWidth * Constants.BoardSize + SpriteClass.font.MeasureString("I").Y + 5), Menu.playerTwo.color);
             sb.DrawString(SpriteClass.font, tree.LatestMoveDescription, new Vector2(Constants.TileWidth, Constants.TileWidth * Constants.BoardSize + SpriteClass.font.MeasureString("I").Y*3 + 5*3), Menu.playerTwo.color);
             if (currentPlayer == 1)
             {
@@ -334,7 +334,7 @@ namespace OthelloMinMaxAI
 
             Placeables.Clear();
 
-            GameManager.GameOver(playerOnePoins, playerTwoPoins, tiles, useAi);
+            GameManager.GameOver(playerOnePoints, playerTwoPoints, tiles, useAi);
         }
 
         private void IntToTile(int[,] intTiles)
@@ -396,15 +396,15 @@ namespace OthelloMinMaxAI
 
         private void CalculatePoints()
         {
-            playerOnePoins = playerTwoPoins = 0;
+            playerOnePoints = playerTwoPoints = 0;
             for (int x = 0; x < TileValues.GetLength(0); x++)
             {
                 for (int y = 0; y < TileValues.GetLength(1); y++)
                 {
                     if (TileValues[x, y] == 1)
-                        playerOnePoins++;
+                        playerOnePoints++;
                     if (TileValues[x, y] == 2)
-                        playerTwoPoins++;
+                        playerTwoPoints++;
                 }
             }
         }
