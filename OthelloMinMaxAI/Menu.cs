@@ -156,7 +156,7 @@ namespace OthelloMinMaxAI
             if (aiButton.buttonPressed)
             {
                 useAi = !useAi;
-                aiButton.ChangeColour(Color.Blue, useAi);
+                aiButton.ChangeColour(new Color(64,128,64,255), new Color(255,128,128,255), useAi);
                 aiButton.buttonPressed = false;
             }
 
@@ -231,7 +231,7 @@ namespace OthelloMinMaxAI
 
             playerOne.Draw(sb);
             playerTwo.Draw(sb);
-            showcase.Draw(sb);
+            //showcase.Draw(sb);
 
         }
     }

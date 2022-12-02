@@ -5,15 +5,15 @@ using System.Diagnostics;
 
 namespace OthelloMinMaxAI
 {
-    static class Tree
+    class Tree
     {
 
-        private static Node root;
-        private static int[,] gameState;
-        private static int alpha, beta;
-        private static Point emptyMove;
+        private Node root;
+        private int[,] gameState;
+        private int alpha, beta;
+        private Point emptyMove;
 
-        public static void GenerateTree(int[,] currentGameState, int AiPlayerIndex)
+        public Tree(int[,] currentGameState, int AiPlayerIndex)
         {
             gameState = currentGameState;
             emptyMove = new Point(-1, -1);
@@ -25,7 +25,7 @@ namespace OthelloMinMaxAI
         /// </summary>
         /// <param name="currentGameState">Compare the recorded gamestate with the actual gamestate and update the root node accordingly</param>
         /// <returns></returns>
-        public static Point GetMove(int[,] currentGameState)
+        public  Point GetMove(int[,] currentGameState)
         {
             Stopwatch stopwatch = new Stopwatch();
             stopwatch.Start();
@@ -40,7 +40,7 @@ namespace OthelloMinMaxAI
             return root.Move;
         }
 
-        private static void MoveRootTo(Node node)
+        private void MoveRootTo(Node node)
         {
             root = node;
             root.ExpandTree();

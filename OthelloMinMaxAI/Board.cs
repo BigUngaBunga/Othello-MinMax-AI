@@ -20,9 +20,10 @@ namespace OthelloMinMaxAI
 
         private readonly Tile[,] tiles;
         private readonly int[,] tileValues;
-
-
         private readonly List<Point> turnPotentials, pointsToTurn;
+        private Tree tree;
+
+
 
         private bool transition, enterEndGame;
         private readonly float diskAnimationInterval;
@@ -78,7 +79,7 @@ namespace OthelloMinMaxAI
                 }
             }
             if (useAi)
-                Tree.GenerateTree(TileValues, 1);
+                tree = new Tree(TileValues, 1);
             SwitchSides();
         }
 
@@ -92,7 +93,7 @@ namespace OthelloMinMaxAI
                     if (timer > AiTimeDelay)
                     {
 
-                        Point move = Tree.GetMove(TileValues);
+                        Point move = tree.GetMove(TileValues);
                         MakeMove(move);
                         timer = 0;
 
@@ -260,7 +261,7 @@ namespace OthelloMinMaxAI
                 lockDetection++;
                 SwitchSides();
                 if (currentlyAi)
-                    Tree.GenerateTree(TileValues, 1);
+                    tree = new Tree(TileValues, 1);
             }
             else
             {
